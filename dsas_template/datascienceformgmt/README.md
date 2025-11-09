@@ -1,2 +1,0 @@
-# datascienceformgmt
-data science template
