@@ -1,0 +1,74 @@
+# Data
+
+## Sources
+Our primary dataset was sourced from Kaggle: **IMDb Movies from 1920 to 2025**, published by Raed Addala. The data was accessed in November 2025.
+
+::: {.callout-important}
+## Data Source Documentation
+
+The dataset is available at the following URL: [https://www.kaggle.com/datasets/raedaddala/imdb-movies-from-1960-to-2023/data](https://www.kaggle.com/datasets/raedaddala/imdb-movies-from-1960-to-2023/data).
+:::
+
+## Description
+The original dataset contains approximately 60,000 movies spanning from 1920 to 2025, with 23 variables for each film. After cleaning and filtering for the 1990–2025 period, our final dataset provides a comprehensive view of the modern film industry.
+
+::: {.callout-note}
+## Dataset Overview
+
+- **Number of observations**: 21869 rows
+- **Number of variables**: 23 columns
+- **Time period**: 1990 to 2025
+- **Geographic coverage**: Global, with a noted bias towards Western/Hollywood films.
+- **Key variables**: `title`, `release_date`, `primary_genre`, `duration_minutes`, `rating`, `votes_numeric`, `budget`, `gross_worldwide`, and `countries_origin`.
+:::
+
+## Loading Data
+The following code loads the pre-processed data, which is the result of the cleaning script we developed. This ensures that our analysis starts with a clean, consistent, and analysis-ready dataset.
+
+```{python}
+#| label: load-data
+#| output: true
+
+"""Loading the cleaned movie dataset."""
+
+import pandas as pd
+from IPython.display import display
+from quarto_runtime import project_root
+
+# Define the path to the PROCESSED data
+processed_data_path = project_root / "data" / "processed" / "Movie_Data_1920_to_2025_cleaned.csv"
+
+# Load the data
+data = pd.read_csv(processed_data_path, skipinitialspace=True)
+
+# Basic data inspection
+print(f"Dataset shape: {data.shape[0]} rows × {data.shape[1]} columns")
+print(f"\nColumn names: {list(data.columns)}")
+
+# Display first few rows
+print("\nFirst 5 rows:")
+display(data.head())
+```
+
+## Wrangling
+
+### General Transformations
+A separate Python script (`src/clean_data.py`) was used to perform all data preprocessing. This approach keeps our reporting document clean and ensures reproducibility. The key steps performed were:
+
+1.  **Filtering by Year**: The dataset was filtered to include only movies released between 1990 and 2025 to align with our research scope.
+2.  **Duration Conversion**: The `duration` column (e.g., "2h 10m") was converted into a numerical format in a new `duration_minutes` column.
+3.  **Currency Cleaning**: Financial columns (`budget`, `gross_worldwide`, etc.) were standardized into a numeric format by removing currency symbols and commas.
+4.  **Genre Extraction**: A `primary_genre` column was created by extracting the first genre from the `genres` list for each movie, simplifying classification.
+5.  **Votes Normalization**: The `votes` column was converted to a numeric type (`votes_numeric`), handling abbreviated values (e.g., 'K' for thousands, 'M' for millions).
+6.  **Date Conversion**: The `release_date` column was converted to a proper datetime format.
+
+### Spotting Mistakes and Missing Data
+During preprocessing, several data quality issues were identified and addressed:
+
+-   **Missing Values**: Many older or less popular films had missing financial data (e.g., `budget`, `gross_worldwide`). Instead of removing these rows, the missing values were kept as `NaN` (Not a Number). This allows us to use the rows for non-financial analysis (like genre or duration trends) while excluding them from financial calculations where necessary.
+-   **Inconsistent Formatting**: As mentioned, `duration`, `budget`, and `genres` were not in a ready-to-use format. Our script standardized these to ensure they could be used in calculations and analysis.
+-   **Geographical Bias**: The dataset has a strong bias towards Hollywood and Western cinema. While we cannot "fix" this, we acknowledge this limitation in our analysis. Our findings on "global" trends will be interpreted with this bias in mind.
+-   **Inflation**: Financial data like `budget` and `gross_worldwide` are not adjusted for inflation. Direct comparisons of monetary values across different decades should be made with caution.
+-   **Subjective Ratings**: IMDb scores are user-based and can reflect cultural or regional bias.
+
+After cleaning, our dataset contains **`{python} data.shape[0]` observations** across **`{python} data.shape[1]` variables**.
